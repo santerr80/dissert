@@ -2,8 +2,8 @@ import os
 from osgeo import gdal
 from tqdm import tqdm
 
-input_dir = r"D:\URFU\VKR\Data\selected\jpeg"
-output_dir = r"D:\URFU\VKR\Data\selected\jpeg\split"
+input_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\selected\jpeg"
+output_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\selected\jpeg\split"
 out_size_image = 256
 
 

@@ -24,13 +24,23 @@ def convert_ecw(input_dir, output_dir):
             continue
 
         try:
+            # Получаем исходные размеры изображения
+            src_ds = gdal.Open(input_path)
+            width = src_ds.RasterXSize
+            height = src_ds.RasterYSize
+            src_ds = None  # Закрываем исходный датасет
+
+            # Рассчитываем целевые размеры, кратные 256
+            target_width = ((width - 1) // 256 + 1) * 256
+            target_height = ((height - 1) // 256 + 1) * 256
+
             # Настройка параметров GDAL
             options = gdal.TranslateOptions(
                 format='JPEG',
                 resampleAlg=gdal.gdalconst.GRA_Average,
                 creationOptions=['QUALITY=50'],
-                widthPct=102.4, # устанавливаем разрешение кратное 16
-                heightPct=102.4
+                width=target_width,
+                height=target_height
             )
             
             # Выполнение преобразования
