@@ -2,8 +2,8 @@ import os
 from osgeo import gdal
 from tqdm import tqdm
 
-input_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\selected\jpeg"
-output_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\selected\jpeg\split"
+input_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\test\masks"
+output_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\test\masks"
 out_size_image = 256
 
 
@@ -15,7 +15,7 @@ def split_image(input_dir, output_dir, out_size_image):
 
     # Получаем список всех TIFF-файлов
     file_list = [f for f in os.listdir(input_dir) \
-                 if f.lower().endswith('.jpeg')]
+                 if f.lower().endswith('.png')]
 
     # Подсчет общего числа кусков для всех файлов
     file_info = []
@@ -24,7 +24,7 @@ def split_image(input_dir, output_dir, out_size_image):
     # Подсчет общего числа кусков для всех файлов
     for filename in file_list:
         input_path = os.path.join(input_dir, filename)
-        image_info = gdal.Info(input_path, format="json")
+        image_info = gdal.Info(input_path, format='json')
         width = image_info['size'][0]
         height = image_info['size'][1]
         x_count = width // out_size_image
@@ -44,7 +44,7 @@ def split_image(input_dir, output_dir, out_size_image):
             top_y = i * out_size_image
             for j in range(x_count):
                 left_x = j * out_size_image
-                output_filename = f"{base_name}_{i:03d}_{j:03d}.jpeg"
+                output_filename = f"{base_name}_{i:03d}_{j:03d}.png"
                 output_path = os.path.join(output_dir, output_filename)
                 if os.path.exists(output_path):
                     progress_bar.write(f"Файл {output_filename} уже существует.")
@@ -53,10 +53,7 @@ def split_image(input_dir, output_dir, out_size_image):
                 try:
                     options = gdal.TranslateOptions(
                         srcWin=[left_x, top_y, out_size_image, out_size_image],
-                        format='JPEG',
-                        resampleAlg=gdal.gdalconst.GRA_Average,
-                        creationOptions=['QUALITY=50'],
-                        strict=True
+                        format='PNG'
                     )
                     gdal.Translate(output_path, input_path, options=options)
                     progress_bar.update(1)

@@ -9,7 +9,7 @@ def create_tile_index(tile_directory, output_path):
     tile_files = [
         os.path.join(tile_directory, f)
         for f in os.listdir(tile_directory)
-        if f.lower().endswith('.jpeg')
+        if f.lower().endswith('.png')
     ]
 
     if not tile_files:
@@ -29,7 +29,7 @@ def create_tile_index(tile_directory, output_path):
         locationFieldName="location",
         writeAbsolutePath=True,
         recursive=False,
-        filenameFilter="*.jpeg",
+        filenameFilter="*.png",
         minPixelSize=0.01,
         maxPixelSize=10.0,
         metadataOptions=["DESCRIPTION=Tile Index"]

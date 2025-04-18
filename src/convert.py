@@ -15,7 +15,7 @@ def convert_ecw(input_dir, output_dir):
     for filename in file_list:
         input_path = os.path.join(input_dir, filename)
         base_name, ext = os.path.splitext(filename)
-        output_filename = f"{base_name}.jpeg"        
+        output_filename = f"{base_name}.png"        
         output_path = os.path.join(output_dir, output_filename)
 
         if os.path.exists(output_path):
@@ -36,11 +36,10 @@ def convert_ecw(input_dir, output_dir):
 
             # Настройка параметров GDAL
             options = gdal.TranslateOptions(
-                format='JPEG',
-                resampleAlg=gdal.gdalconst.GRA_Average,
-                creationOptions=['QUALITY=50'],
+                format='PNG',
                 width=target_width,
-                height=target_height
+                height=target_height,
+                outputType=gdal.GDT_Byte
             )
             
             # Выполнение преобразования
@@ -55,3 +54,9 @@ def convert_ecw(input_dir, output_dir):
                 "Произошла ошибка при обработке ECW-файла. Проверьте, что GDAL доступен и установлен правильно."    
             )
     progress_bar.close()
+
+
+input_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\selected"
+output_dir = r"D:\URFU\VKR\Ind_pract\dissert\data\selected\png"
+
+convert_ecw(input_dir, output_dir)

@@ -5,49 +5,72 @@ from torchvision import transforms
 from PIL import Image
 from sklearn.model_selection import train_test_split
 import os
+import matplotlib.pyplot as plt
+
+# Трансформации для изображений
+image_transforms = transforms.Compose([
+    transforms.ToTensor(),  # Преобразование в тензор
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Нормализация
+])
+
+# Трансформации для масок
+mask_transforms = transforms.Compose([
+    transforms.ToTensor()  # Преобразование в тензор
+])
 
 
-# Кастомный датасет
-class CustomDataset(Dataset):
-    def __init__(self, image_dir, mask_dir, transform=None):
+# Применение в Dataset
+class SegmentationDataset(Dataset):
+    def __init__(self, image_dir, mask_dir, image_transform=None, mask_transform=None):
         self.image_dir = image_dir
         self.mask_dir = mask_dir
-        self.transform = transform
-        self.image_filenames = [f for f in os.listdir(image_dir) if f.endswith('.jpg')]
+        self.image_transform = image_transform
+        self.mask_transform = mask_transform
+        self.images = os.listdir(image_dir)
 
     def __len__(self):
-        return len(self.image_filenames)
+        return len(self.images)
 
     def __getitem__(self, idx):
-        img_path = os.path.join(self.image_dir, self.image_filenames[idx])
-        mask_path = os.path.join(self.mask_dir, self.image_filenames[idx])
+        img_path = os.path.join(self.image_dir, self.images[idx])
+        mask_path = os.path.join(self.mask_dir, self.images[idx])
         image = Image.open(img_path).convert("RGB")
-        mask = Image.open(mask_path).convert("L")
+        mask = Image.open(mask_path).convert("L")  # Grayscale для маски
 
-        if self.transform:
-            image = self.transform(image)
-            mask = self.transform(mask)
+        if self.image_transform:
+            image = self.image_transform(image)
+        if self.mask_transform:
+            mask = self.mask_transform(mask)
 
         return image, mask
 
+# Использование
+dataset = SegmentationDataset(
+    image_dir=r'D:\URFU\VKR\Ind_pract\dissert\data\test\data\images',
+    mask_dir=r'D:\URFU\VKR\Ind_pract\dissert\data\test\data\masks',
+    image_transform=None, mask_transform=None
+)
+dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
 
-# создание датасета
-image_dir = r"D:\URFU\VKR\Data\selected\jpeg\split"
-mask_dir = r"D:\URFU\VKR\Data\selected\jpeg\split\masks"
-image, mask = CustomDataset(image_dir, mask_dir, transform=transforms.ToTensor())
+images, masks = next(iter(dataloader))
 
-# разделение на тренировочную и тестовую выборку
-train_images, val_images, train_masks, val_masks = train_test_split(images, masks, test_size=0.2, random_state=42)
-
-model = smp.UnetPlusPlus(encoder_name='resnet34',
-                         encoder_depth=5,
-                         encoder_weights="imagenet",
-                         decoder_channels=(256, 128, 64, 32, 16),
-                         decoder_interpolation='nearest',
-                         in_channels=3,
-                         classes=1,
-                         activation='sigmoid',
-                         aux_params=None
-                         )
-model.eval()
-
+# helper function for data visualization
+def visualize(**images):
+    """PLot images in one row."""
+    n = len(images)
+    plt.figure(figsize=(16, 5))
+    for i, (name, image) in enumerate(images.items()):
+        plt.subplot(1, n, i + 1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title(" ".join(name.split("_")).title())
+        if name == "image":
+            plt.imshow(image.transpose(1, 2, 0))
+        else:
+            plt.imshow(image)
+    plt.show()
+    
+visualize(
+    image=images[0],
+    cars_mask=masks.squeeze(),
+)
